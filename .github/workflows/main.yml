@@ -1,3 +1,15 @@
+name: Deploy to DevOps Classroom
+
+# Chạy tự động khi có code mới push lên nhánh main
+on:
+  push:
+    branches: [ "main" ] 
+
+jobs:
+  deploy-job:
+    runs-on: ubuntu-latest
+    steps:
+      # Đây là đoạn code của bạn được đặt đúng chỗ
       - name: Triển khai lên DevOps Classroom
         run: |
           REPO="docker push nhan20474/demo:tagname"
