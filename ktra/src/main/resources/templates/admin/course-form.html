@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isNew} ? 'Thêm học phần - Course Hub' : 'Chỉnh sửa học phần - Course Hub'">
+        Course Form
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; }
+        #imgPreview {
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-xl-6">
+
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb small">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/admin/courses}" class="text-decoration-none">Quản lý học phần</a>
+                        </li>
+                        <li class="breadcrumb-item active"
+                            th:text="${isNew} ? 'Thêm mới' : 'Chỉnh sửa'"></li>
+                    </ol>
+                </nav>
+
+                <div class="card shadow-sm border-0 rounded-3">
+                    <!-- Card header -->
+                    <div class="card-header border-0 rounded-top-3 py-3"
+                         style="background:linear-gradient(90deg,#1565C0,#1976D2)">
+                        <h5 class="mb-0 text-white fw-bold">
+                            <i class="bi bi-book me-2"></i>
+                            <span th:text="${isNew} ? 'Thêm học phần mới' : 'Chỉnh sửa học phần'"></span>
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <form th:action="${isNew} ? @{/admin/courses} : @{/admin/courses/{id}(id=${course.id})}"
+                              method="post">
+
+                            <!-- Tên học phần -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">
+                                    Tên học phần <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="name"
+                                       th:value="${course.name}"
+                                       placeholder="VD: Lập trình Java nâng cao" required>
+                            </div>
+
+                            <!-- Credits + Category row -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-5">
+                                    <label class="form-label fw-semibold small">
+                                        Số tín chỉ <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" class="form-control" name="credits"
+                                           th:value="${course.credits > 0 ? course.credits : ''}"
+                                           placeholder="VD: 3" min="1" max="10" required>
+                                </div>
+                                <div class="col-sm-7">
+                                    <label class="form-label fw-semibold small">Danh mục</label>
+                                    <select class="form-select" name="categoryId">
+                                        <option value="">-- Chọn danh mục --</option>
+                                        <option th:each="cat : ${categories}"
+                                                th:value="${cat.id}"
+                                                th:text="${cat.name}"
+                                                th:selected="${course.category != null and course.category.id == cat.id}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Giảng viên -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">
+                                    Giảng viên <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="lecturer"
+                                       th:value="${course.lecturer}"
+                                       placeholder="Họ và tên giảng viên" required>
+                            </div>
+
+                            <!-- URL hình ảnh -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">URL hình ảnh</label>
+                                <input type="url" class="form-control" name="image" id="imageUrlInput"
+                                       th:value="${course.image}"
+                                       placeholder="https://example.com/course-image.jpg"
+                                       oninput="handleImagePreview(this.value)">
+                                <div class="mt-2">
+                                    <img id="imgPreview" class="w-100"
+                                         th:src="${course.image != null && !#strings.isEmpty(course.image)} ? ${course.image} : ''"
+                                         th:style="${course.image != null && !#strings.isEmpty(course.image)} ? 'display:block' : 'display:none'"
+                                         alt="Preview ảnh">
+                                </div>
+                                <div class="form-text">Để trống nếu không có hình ảnh</div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4 rounded-pill">
+                                    <i class="bi bi-save me-1"></i>
+                                    <span th:text="${isNew} ? 'Thêm học phần' : 'Lưu thay đổi'"></span>
+                                </button>
+                                <a th:href="@{/admin/courses}"
+                                   class="btn btn-outline-secondary px-4 rounded-pill">
+                                    <i class="bi bi-x me-1"></i>Hủy
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function handleImagePreview(url) {
+            const preview = document.getElementById('imgPreview');
+            if (url && url.trim()) {
+                preview.src = url.trim();
+                preview.style.display = 'block';
+                preview.onerror = () => { preview.style.display = 'none'; };
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

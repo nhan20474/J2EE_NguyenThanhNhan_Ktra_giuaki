@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Hub - Lỗi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1565C0 0%, #42A5F5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center text-white py-5">
+        <i class="bi bi-exclamation-triangle-fill mb-3" style="font-size:5rem;opacity:.8"></i>
+        <h1 class="fw-bold display-4" th:text="${status}">404</h1>
+        <h4 class="fw-semibold mb-3" th:text="${error}">Not Found</h4>
+        <p class="opacity-75 mb-4" th:text="${message}">Trang không tồn tại</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="/home" class="btn btn-light px-4 rounded-pill fw-semibold">
+                <i class="bi bi-house me-1"></i>Về trang chủ
+            </a>
+            <button onclick="history.back()" class="btn btn-outline-light px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại
+            </button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Hub - Học phần của tôi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; }
+        .course-card {
+            border-radius: 12px;
+            transition: transform .25s ease, box-shadow .25s ease;
+            overflow: hidden;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(21,101,192,.15) !important;
+        }
+        .course-img { height: 155px; object-fit: cover; width: 100%; }
+        .enrolled-ribbon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(25,135,84,.85);
+            backdrop-filter: blur(4px);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: .73rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Hero -->
+    <div class="py-4 text-white" style="background:linear-gradient(135deg,#1565C0,#42A5F5)">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="fw-bold mb-1">
+                        <i class="bi bi-journal-bookmark-fill me-2"></i>Học phần của tôi
+                    </h2>
+                    <p class="mb-0 opacity-75">
+                        Bạn đã đăng ký
+                        <strong th:text="${enrollments.size()}">0</strong> học phần
+                    </p>
+                </div>
+                <div class="col-auto d-none d-md-block">
+                    <i class="bi bi-bookmark-check-fill" style="font-size:4rem;opacity:.2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+
+        <!-- Course grid -->
+        <div th:if="${!enrollments.isEmpty()}"
+             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="col" th:each="enrollment : ${enrollments}">
+                <div class="card h-100 course-card shadow-sm border-0 bg-white position-relative">
+                    <span class="enrolled-ribbon">
+                        <i class="bi bi-patch-check-fill me-1"></i>Đã đăng ký
+                    </span>
+                    <img th:src="${enrollment.course.image != null && !#strings.isEmpty(enrollment.course.image)}
+                                  ? ${enrollment.course.image}
+                                  : 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=200&fit=crop'"
+                         class="course-img"
+                         onerror="this.src='https://via.placeholder.com/400x155?text=No+Image'"
+                         alt="">
+                    <div class="card-body d-flex flex-column p-3">
+                        <h6 class="fw-bold mb-2 lh-sm" style="font-size:.9rem"
+                            th:text="${enrollment.course.name}">Tên học phần</h6>
+
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <span class="badge text-white"
+                                  style="background:linear-gradient(90deg,#1976D2,#42A5F5)"
+                                  th:text="${enrollment.course.credits} + ' tín chỉ'"></span>
+                            <span class="badge bg-light text-secondary border"
+                                  th:if="${enrollment.course.category != null}"
+                                  th:text="${enrollment.course.category.name}"></span>
+                        </div>
+
+                        <p class="text-muted mb-1" style="font-size:.82rem">
+                            <i class="bi bi-person-fill me-1"></i>
+                            <span th:text="${enrollment.course.lecturer}"></span>
+                        </p>
+
+                        <p class="text-muted mt-auto mb-0" style="font-size:.78rem">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            Đăng ký:
+                            <span th:text="${#temporals.format(enrollment.enrollDate, 'dd/MM/yyyy')}">
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${enrollments.isEmpty()}" class="text-center py-5">
+            <div class="mb-3">
+                <i class="bi bi-journal-x" style="font-size:4.5rem;color:#c9d6e3"></i>
+            </div>
+            <h4 class="text-muted fw-semibold">Bạn chưa đăng ký học phần nào</h4>
+            <p class="text-muted">Khám phá danh sách học phần và đăng ký ngay!</p>
+            <a th:href="@{/home}" class="btn btn-primary rounded-pill px-4 mt-2">
+                <i class="bi bi-search me-2"></i>Khám phá học phần
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white-50 text-center py-3 mt-5 small">
+        <i class="bi bi-mortarboard-fill text-primary me-1"></i>
+        Course Hub &copy; 2025 — Hệ thống đăng ký học phần
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

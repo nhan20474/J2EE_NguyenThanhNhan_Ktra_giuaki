@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Hub - Trang chủ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; }
+
+        .hero-section {
+            background: linear-gradient(135deg, #1565C0 0%, #42A5F5 100%);
+            padding: 2rem 0 1.5rem;
+        }
+
+        .course-card {
+            transition: transform .25s ease, box-shadow .25s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .course-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(21,101,192,.18) !important;
+        }
+        .course-img {
+            height: 165px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .badge-credits {
+            background: linear-gradient(90deg,#1976D2,#42A5F5);
+        }
+
+        .page-link { border-radius: 8px !important; margin: 0 2px; }
+        .page-item.active .page-link { background: #1976D2; border-color: #1976D2; }
+
+        .alert-flash { border-left: 4px solid; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Hero -->
+    <div class="hero-section text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="fw-bold mb-1">
+                        <i class="bi bi-collection-fill me-2"></i>Danh sách học phần
+                    </h2>
+                    <p class="mb-0 opacity-75">
+                        Khám phá
+                        <strong th:text="${totalItems}">0</strong>
+                        học phần — đăng ký ngay hôm nay!
+                    </p>
+                </div>
+                <div class="col-auto d-none d-md-block">
+                    <i class="bi bi-mortarboard-fill" style="font-size:4rem;opacity:.25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+
+        <!-- Flash messages -->
+        <div th:if="${successMsg}" class="alert alert-success alert-flash alert-dismissible fade show border-success mb-3">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${successMsg}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${warningMsg}" class="alert alert-warning alert-flash alert-dismissible fade show border-warning mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${warningMsg}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Search result notice -->
+        <div th:if="${search != null && !#strings.isEmpty(search)}"
+             class="alert alert-info d-flex align-items-center mb-4 py-2">
+            <i class="bi bi-search me-2"></i>
+            Kết quả tìm kiếm cho:
+            <strong class="mx-1" th:text="${search}"></strong>
+            <a th:href="@{/home}" class="btn btn-sm btn-outline-secondary ms-auto rounded-pill">
+                <i class="bi bi-x me-1"></i>Xóa
+            </a>
+        </div>
+
+        <!-- Course Grid: 5 per row on large screens, responsive -->
+        <div th:if="${!courses.isEmpty()}"
+             class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+            <div class="col" th:each="course : ${courses}">
+                <div class="card h-100 course-card shadow-sm border-0 bg-white">
+                    <!-- Course image -->
+                    <img th:src="${course.image != null && !#strings.isEmpty(course.image)}
+                                  ? ${course.image}
+                                  : 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=200&fit=crop'"
+                         class="course-img"
+                         th:alt="${course.name}"
+                         onerror="this.src='https://via.placeholder.com/400x165?text=No+Image'">
+
+                    <div class="card-body d-flex flex-column p-3">
+                        <h6 class="card-title fw-bold mb-2 lh-sm" style="font-size:.9rem"
+                            th:text="${course.name}">Tên học phần</h6>
+
+                        <div class="mb-2 d-flex flex-wrap gap-1">
+                            <span class="badge badge-credits text-white"
+                                  th:text="${course.credits} + ' tín chỉ'"></span>
+                            <span class="badge bg-light text-secondary border"
+                                  th:if="${course.category != null}"
+                                  th:text="${course.category.name}"></span>
+                        </div>
+
+                        <p class="text-muted mb-3" style="font-size:.82rem">
+                            <i class="bi bi-person-fill me-1"></i>
+                            <span th:text="${course.lecturer}"></span>
+                        </p>
+
+                        <!-- Action area -->
+                        <div class="mt-auto">
+                            <!-- Already enrolled -->
+                            <button class="btn btn-success btn-sm w-100 disabled rounded-pill"
+                                    th:if="${enrolledIds.contains(course.id)}">
+                                <i class="bi bi-patch-check-fill me-1"></i>Đã đăng ký
+                            </button>
+
+                            <!-- Enroll: only STUDENT who hasn't enrolled -->
+                            <form th:if="${!enrolledIds.contains(course.id)}"
+                                  th:action="@{/enroll/{id}(id=${course.id})}" method="post"
+                                  sec:authorize="hasRole('STUDENT')">
+                                <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill">
+                                    <i class="bi bi-plus-circle me-1"></i>Đăng ký
+                                </button>
+                            </form>
+
+                            <!-- Guest prompt -->
+                            <a th:if="${!enrolledIds.contains(course.id)}"
+                               th:href="@{/login}"
+                               class="btn btn-outline-secondary btn-sm w-100 rounded-pill"
+                               sec:authorize="!isAuthenticated()">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập để đăng ký
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${courses.isEmpty()}" class="text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <h4 class="mt-3 text-muted">Không tìm thấy học phần nào</h4>
+            <p class="text-muted">Thử tìm với từ khóa khác hoặc xóa bộ lọc</p>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}" class="mt-5">
+            <ul class="pagination justify-content-center flex-wrap gap-1">
+                <!-- Previous -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link shadow-sm"
+                       th:href="@{/home(page=${currentPage - 1}, search=${search})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                <!-- Page numbers -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link shadow-sm"
+                       th:href="@{/home(page=${i}, search=${search})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <!-- Next -->
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link shadow-sm"
+                       th:href="@{/home(page=${currentPage + 1}, search=${search})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+            <p class="text-center text-muted small mt-2">
+                Trang <span th:text="${currentPage + 1}"></span> /
+                <span th:text="${totalPages}"></span>
+                &nbsp;·&nbsp;
+                Tổng <span th:text="${totalItems}"></span> học phần
+            </p>
+        </nav>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white-50 text-center py-3 mt-5 small">
+        <i class="bi bi-mortarboard-fill text-primary me-1"></i>
+        Course Hub &copy; 2025 — Hệ thống đăng ký học phần
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
