@@ -1,6 +1,7 @@
 package com.example.ktra.controller;
 
 import com.example.ktra.entity.Enrollment;
+import com.example.ktra.security.CustomOAuth2User;
 import com.example.ktra.security.CustomUserDetails;
 import com.example.ktra.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,8 @@ public class EnrollController {
         if (auth == null) return null;
         if (auth.getPrincipal() instanceof CustomUserDetails ud) {
             return ud.getStudent().getStudentId();
+        } else if (auth.getPrincipal() instanceof CustomOAuth2User ou) {
+            return ou.getStudent().getStudentId();
         }
         return null;
     }

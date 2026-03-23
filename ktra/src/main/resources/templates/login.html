@@ -77,6 +77,20 @@
                             </button>
                         </form>
 
+                        <!-- Divider -->
+                        <div class="d-flex align-items-center my-3">
+                            <hr class="flex-grow-1 opacity-25">
+                            <span class="divider-text">hoặc</span>
+                            <hr class="flex-grow-1 opacity-25">
+                        </div>
+
+                        <!-- Google OAuth2 -->
+                        <a th:href="@{/oauth2/authorization/google}"
+                           class="btn btn-outline-secondary w-100 py-2 google-btn rounded-pill">
+                            <img src="https://www.google.com/favicon.ico" width="18" class="me-2" alt="Google">
+                            Đăng nhập với Google
+                        </a>
+
                         <div class="text-center mt-4 small">
                             <span class="text-muted">Chưa có tài khoản?</span>
                             <a th:href="@{/register}" class="ms-1 fw-semibold text-primary text-decoration-none">

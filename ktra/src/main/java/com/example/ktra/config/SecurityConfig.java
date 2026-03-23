@@ -1,7 +1,7 @@
 package com.example.ktra.config;
 
+import com.example.ktra.service.CustomOAuth2UserService;
 import com.example.ktra.service.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,26 +15,28 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
+    public DaoAuthenticationProvider authenticationProvider(
+            CustomUserDetailsService customUserDetailsService,
+            PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(customUserDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            DaoAuthenticationProvider authenticationProvider,
+            CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http
-            .authenticationProvider(authenticationProvider())
+            .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
                 // Chi ADMIN moi vao duoc /admin/**
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -56,6 +58,14 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/home", true)
                 .failureUrl("/login?error=true")
                 .permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .defaultSuccessUrl("/home", true)
+                .failureUrl("/login?error=true")
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
